@@ -1,0 +1,16 @@
+{
+  "name": "Express-backend",
+  "version": "0.0.1",
+  "description": "Express-assessment",
+  "license": "ISC",
+  "author": "saharad chimdonthong",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {}
+}
