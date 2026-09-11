@@ -34,6 +34,30 @@ export default function App() {
     fetchData();
   }, []);
 
+// const fetchData = async () => {
+//       setLoading(true);
+//       try {
+//         // เปลี่ยน URL มาชี้ที่ Backend ของคุณ
+//         const response = await fetch("http://localhost:3001/products");
+
+//         // เช็ก HTTP Status เพื่อความปลอดภัย
+//         if (!response.ok) {
+//           throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+
+//         const data = await response.json();
+
+//         setProducts(data); // อัพเดทตัวproducts
+//       } catch (error) {
+//         console.error("Error fetching data:", error);
+//         setError("ไม่สามารถโหลดข้อมูลสินค้าได้ กรุณาลองใหม่อีกครั้ง"); //ทำการset state เมื่อเกิดerror ถ้าไม่สามารถดึงข้อมูลมาได้
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchData();
+
   return (
     <div>
       <div
