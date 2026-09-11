@@ -7,6 +7,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Helper สำหรับส่ง Error Response ให้เป็นมาตรฐานเดียวกันทั้ง API
+const sendError = (res, statusCode, message) => {
+  return res.status(statusCode).json({
+    success: false,
+    error: message,
+  });
+};
+
 app.get("/products", (req, res, next) => {
   try {
     res.json(products);
@@ -20,7 +28,8 @@ app.get("/products/:id", (req, res, next) => {
     const product = products.find((p) => p.id === req.params.id);
 
     if (!product) {
-      return res.status(404).json({ error: "User not found!" });
+      // FIX 1: เปลี่ยนมาใช้ sendError() เพื่อให้ response format ตรงกับ endpoint อื่น
+      return sendError(res, 404, "Product not found!");
     }
 
     return res.status(200).json(product);
@@ -33,12 +42,9 @@ app.post("/products", (req, res, next) => {
   try {
     const { name, price, quantity } = req.body;
 
-    // Validation: ตรวจสอบว่ามี name และ price ส่งมาหรือไม่
+    // FIX 2: ปรับ Validation และใช้ sendError() แทนโครงสร้างเดิม
     if (!name || price === undefined) {
-      return res.status(400).json({
-        success: false,
-        message: "Products required for name and price",
-      });
+      return sendError(res, 400, "Name and price are required");
     }
 
     // สร้าง product ชิ้นใหม่
@@ -59,27 +65,27 @@ app.post("/products", (req, res, next) => {
 
 app.put("/products/:id", (req, res, next) => {
   try {
-    const product = products.find((u) => u.id === req.params.id);
+    // FIX 3: เปลี่ยนชื่อตัวแปร u เป็น p เพื่ออ่านโค้ดเข้าใจง่ายขึ้น และเปลี่ยนมาใช้ sendError()
+    const product = products.find((p) => p.id === req.params.id);
     if (!product) {
-      return res.status(404).json({ error: "Product not found!" });
+      return sendError(res, 404, "Product not found!");
     }
     const { name, price, quantity } = req.body;
 
-    if (!name || !price) {
-      return res.status(400).json({ error: "name and price required" });
+    // FIX 4: ใช้ sendError() และปรับข้อความให้เป็นมาตรฐานเดียวกับ POST
+    if (!name || price === undefined) {
+      return sendError(res, 400, "Name and price are required");
     }
-
     product.name = String(name);
     product.price = Number(price);
-    product.quantity = quantity !== undefined ? Number(quantity) : product.quantity;
+    product.quantity =
+      quantity !== undefined ? Number(quantity) : product.quantity;
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Product updated successfully",
-        updatedProduct: product,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
+      updatedProduct: product,
+    });
   } catch (err) {
     next(err);
   }
@@ -90,7 +96,8 @@ app.delete("/products/:id", (req, res, next) => {
     const index = products.findIndex((p) => p.id === req.params.id);
 
     if (index === -1) {
-      return res.status(404).json({ error: "Product not found!" });
+      // FIX 5: เปลี่ยนมาใช้ sendError()
+      return sendError(res, 404, "Product not found!");
     }
 
     const [deleted] = products.splice(index, 1);
@@ -103,6 +110,15 @@ app.delete("/products/:id", (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+// Centralized Error Handling Middleware
+app.use((err, req, res, next) => {
+  return sendError(
+    res,
+    500,
+    `Something went wrong on the server: ${err.message}`,
+  );
 });
 
 const PORT = 3001;

@@ -5,8 +5,9 @@ export default function App() {
   const { lightTheme, darkTheme, theme, setTheme } = useContext(ThemeContext);
   const [loading, setLoading] = useState(false); //เก็บสถานะการโหลดข้อมูล
   const [products, setProducts] = useState([]); //เก็บค่าข้อมูลที่fetchมา
+  const [error, setError] = useState(null); //เก็บสถานะ ถ้าไม่สามารถดึงข้อมูลได้
 
-  // fetchข้อมูลจากclent
+  // Fetch ข้อมูลจาก Server มาที่ Client
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -24,6 +25,7 @@ export default function App() {
         setProducts(data); // อัพเดทตัวproducts
       } catch (error) {
         console.error("Error fetching data:", error);
+        setError("ไม่สามารถโหลดข้อมูลสินค้าได้ กรุณาลองใหม่อีกครั้ง"); //ทำการset state เมื่อเกิดerror ถ้าไม่สามารถดึงข้อมูลมาได้
       } finally {
         setLoading(false);
       }
@@ -54,6 +56,11 @@ export default function App() {
       </div>
       <div className="w-full">
         <h1 className="text-center text-3xl font-bold">Product List</h1>
+
+        {error && (
+          <p className="text-center p-8 text-red-500 font-medium">{error}</p>
+        )}
+
         {loading ? (
           <p className="text-center p-8 text-slate-500 font-medium">
             กำลังโหลดข้อมูล...
@@ -86,7 +93,6 @@ export default function App() {
             </table>
           </div>
         )}
-        ;
       </div>
     </div>
   );
