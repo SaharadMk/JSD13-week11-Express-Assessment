@@ -7,7 +7,17 @@ GET {{baseUrl}}/products
 GET {{baseUrl}}/products/1
 
 ### Add a product
-POST http://localhost:3000/products
+POST {{baseUrl}}/products/
+Content-Type: application/json
+
+{
+  "name": "Keyboard",
+  "price": 49.99,
+  "quantity": 1
+}
+
+### Update product by id
+PUT {{baseUrl}}/products/2
 Content-Type: application/json
 
 {

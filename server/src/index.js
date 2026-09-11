@@ -57,33 +57,49 @@ app.post("/products", (req, res, next) => {
   }
 });
 
-// app.put("/products/:id", (req,res,next) => {
-// try {
-
-// } catch (err) {
-//   next(err)
-
-// }
-
-// });
-
-app.delete("/products/:id", (req, res, next) => {
+app.put("/products/:id", (req, res, next) => {
   try {
-    const product = products.findIndex((p) => p.id === req.params.id);
+    const product = products.find((u) => u.id === req.params.id);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found!" });
+    }
+    const { name, price, quantity } = req.body;
 
-    if (product === -1) {
-      return res.status(404).json({ error: "User not found!" });
+    if (!name || !price) {
+      return res.status(400).json({ error: "name and price required" });
     }
 
-    const [deleted] = products.splice(product, 1);
+    product.name = String(name);
+    product.price = Number(price);
+    product.quantity = quantity !== undefined ? Number(quantity) : product.quantity;
 
     return res
       .status(200)
       .json({
         success: true,
-        message: "Product deleted successfully",
-        deletedProduct: deleted,
+        message: "Product updated successfully",
+        updatedProduct: product,
       });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete("/products/:id", (req, res, next) => {
+  try {
+    const index = products.findIndex((p) => p.id === req.params.id);
+
+    if (index === -1) {
+      return res.status(404).json({ error: "Product not found!" });
+    }
+
+    const [deleted] = products.splice(index, 1);
+
+    return res.status(200).json({
+      success: true,
+      message: "Product deleted successfully",
+      deletedProduct: deleted,
+    });
   } catch (err) {
     next(err);
   }
