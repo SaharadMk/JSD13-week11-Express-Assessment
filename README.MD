@@ -23,7 +23,6 @@ npm i
 cd client
 npm i
 
----
 
 ### 2. Start Application
 
@@ -39,5 +38,3 @@ npm run dev
 
 
 _รันบนพอร์ต : http://localhost:5173_
-
----
