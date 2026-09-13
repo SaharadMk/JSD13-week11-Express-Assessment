@@ -55,9 +55,15 @@ app.post("/products", (req, res, next) => {
       quantity: quantity !== undefined ? Number(quantity) : 1, // ถ้าไม่ส่ง quantity มา ให้เป็นค่า default คือ 1
     };
 
+    // โค้ดส่วนบนของการสร้าง newProduct ยังเหมือนเดิม
     products.push(newProduct);
 
-    return res.status(201).json(newProduct);
+    // เปลี่ยนบรรทัด return เป็นแบบนี้
+    return res.status(201).json({
+      success: true,
+      message: "Product added successfully",
+      newProduct: newProduct,
+    });
   } catch (err) {
     next(err);
   }

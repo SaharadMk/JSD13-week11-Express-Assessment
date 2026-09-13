@@ -81,13 +81,31 @@ export default function App() {
       return;
     }
     try {
-      const response = await fetch(`${API}/${id}`, {
+      const response = await fetch(`${API}/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json", // บอก Server ว่าเราส่งข้อมูลไปเป็น JSON นะ
         },
         body: JSON.stringify(formData), // แปลง Object เป็น String JSON
       });
+      // เช็ก HTTP Status เพื่อความปลอดภัย
+      if (!response.ok) {
+        throw new Error(
+          `Cannot delete this product! HTTP error! status: ${response.status}`,
+        );
+      }
+
+      const newProduct = await response.json();
+
+      // เอา message จากฝั่ง Server มาแสดง Alert
+      alert(newProduct.message);
+
+      // 🌟 อัปเดตหน้าจอทันที
+      // เอาของเดิมมากระจายออก (...prev) แล้วเอาของใหม่ไปต่อท้าย
+      setProducts((prev) => [...prev, newProduct]);
+
+      // ล้างค่าในฟอร์มให้กลับมาว่างเปล่า เพื่อพร้อมกรอกชิ้นต่อไป
+      setFormData({ name: "", price: "", quantity: 1 });
     } catch (error) {
       console.error("Error fetching data:", error);
       setError("ไม่สามารถโหลดข้อมูลสินค้าได้ กรุณาลองใหม่อีกครั้ง"); //ทำการset state เมื่อเกิดerror ถ้าไม่สามารถดึงข้อมูลมาได้
@@ -127,40 +145,94 @@ export default function App() {
           </p>
         ) : (
           <div className="flex flex-col items-center justify-center mt-6 overflow-x-auto ">
-            <table className="w-full max-w-2xl text-left border-collapse border border-gray-300">
-              {/* 1. ส่วนหัวตาราง (Header) */}
-              <thead>
-                <tr className="bg-gray-200 border-b border-gray-300">
-                  <th className="p-3">สินค้า</th>
-                  <th className="p-3 text-center">ราคา</th>
-                  <th className="p-3 text-center">จำนวน</th>
-                  <th className="p-3 text-center">จัดการ</th>
-                </tr>
-              </thead>
+            {/* ฟอร์มเพิ่มสินค้า */}
+            <form
+              onSubmit={handleAddProduct}
+              className="flex gap-2 mb-6 items-end justify-center w-full max-w-2xl"
+            >
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold mb-1">ชื่อสินค้า</label>
+                <input
+                  type="text"
+                  placeholder="เช่น คีย์บอร์ด"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="border border-gray-300 p-2 rounded"
+                />
+              </div>
 
-              {/* 2. ส่วนข้อมูล (Body) */}
-              <tbody>
-                {products.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="border-b border-gray-200 hover:bg-gray-100"
-                  >
-                    <td className="p-3 font-semibold">{p.name}</td>
-                    <td className="p-3 text-center">฿{p.price}</td>
-                    <td className="p-3 text-center">{p.quantity}</td>
-                    {/* เพิ่มคอลัมน์ปุ่มลบตรงนี้ */}
-                    <td className="p-3 text-center">
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="bg-red-700 hover:bg-red-400 text-white px-3 py-1 rounded cursor-pointer"
-                      >
-                        ลบ
-                      </button>
-                    </td>
+              <div className="flex flex-col w-32">
+                <label className="text-sm font-semibold mb-1">ราคา</label>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
+                  className="border border-gray-300 p-2 rounded"
+                />
+              </div>
+
+              <div className="flex flex-col w-24">
+                <label className="text-sm font-semibold mb-1">จำนวน</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.quantity}
+                  onChange={(e) =>
+                    setFormData({ ...formData, quantity: e.target.value })
+                  }
+                  className="border border-gray-300 p-2 rounded"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded h-10 cursor-pointer"
+              >
+                เพิ่มสินค้า
+              </button>
+            </form>
+
+            <div >
+              <table className="w-full max-w-2xl text-left border-collapse border border-gray-300">
+                {/* 1. ส่วนหัวตาราง (Header) */}
+                <thead>
+                  <tr className="bg-gray-200 border-b border-gray-300">
+                    <th className="p-3">สินค้า</th>
+                    <th className="p-3 text-center">ราคา</th>
+                    <th className="p-3 text-center">จำนวน</th>
+                    <th className="p-3 text-center">จัดการ</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                {/* 2. ส่วนข้อมูล (Body) */}
+                <tbody>
+                  {products.map((p) => (
+                    <tr
+                      key={p.id}
+                      className="border-b border-gray-200 hover:bg-gray-100"
+                    >
+                      <td className="p-3 font-semibold">{p.name}</td>
+                      <td className="p-3 text-center">฿{p.price}</td>
+                      <td className="p-3 text-center">{p.quantity}</td>
+                      {/* เพิ่มคอลัมน์ปุ่มลบตรงนี้ */}
+                      <td className="p-3 text-center">
+                        <button
+                          onClick={() => handleDelete(p.id)}
+                          className="bg-red-700 hover:bg-red-400 text-white px-3 py-1 rounded cursor-pointer"
+                        >
+                          ลบ
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
