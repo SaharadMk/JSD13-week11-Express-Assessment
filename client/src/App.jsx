@@ -14,31 +14,37 @@ export default function App() {
     price: "",
     quantity: 1, // default ตามโจทย์
   });
+  // const [editingID, setEditingId] = usestate(null);
+  // const [editFormData, setEditFormData] = usestate({
+  //   nane: "",
+  //   price: "",
+  //   quatity: 1,
+  // });
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // เปลี่ยน URL มาชี้ที่ Backend ของคุณ
+      const response = await fetch(API);
+
+      // เช็ก HTTP Status เพื่อความปลอดภัย
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      setProducts(data); // อัพเดทตัวproducts
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("ไม่สามารถโหลดข้อมูลสินค้าได้ กรุณาลองใหม่อีกครั้ง"); //ทำการset state เมื่อเกิดerror ถ้าไม่สามารถดึงข้อมูลมาได้
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Fetch ข้อมูลจาก Server มาที่ Client
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // เปลี่ยน URL มาชี้ที่ Backend ของคุณ
-        const response = await fetch(API);
-
-        // เช็ก HTTP Status เพื่อความปลอดภัย
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        setProducts(data); // อัพเดทตัวproducts
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("ไม่สามารถโหลดข้อมูลสินค้าได้ กรุณาลองใหม่อีกครั้ง"); //ทำการset state เมื่อเกิดerror ถ้าไม่สามารถดึงข้อมูลมาได้
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
 
@@ -60,7 +66,8 @@ export default function App() {
       const data = await response.json();
 
       // เอา message จากฝั่ง Server มาแสดง Alert
-      alert(data.message);
+      // alert(data.message);
+
       // โชว์ใน Console ว่าลบอะไรไป (เพื่อการ Debug)
       console.log("สินค้าที่ถูกลบ:", data.deletedProduct);
 
@@ -81,7 +88,7 @@ export default function App() {
       return;
     }
     try {
-      const response = await fetch(`${API}/`, {
+      const response = await fetch(API, {
         method: "POST",
         headers: {
           "Content-Type": "application/json", // บอก Server ว่าเราส่งข้อมูลไปเป็น JSON นะ
@@ -91,18 +98,18 @@ export default function App() {
       // เช็ก HTTP Status เพื่อความปลอดภัย
       if (!response.ok) {
         throw new Error(
-          `Cannot delete this product! HTTP error! status: ${response.status}`,
+          `Cannot add this product! HTTP error! status: ${response.status}`,
         );
       }
 
-      const newProduct = await response.json();
+      const dataNew = await response.json();
 
       // เอา message จากฝั่ง Server มาแสดง Alert
-      alert(newProduct.message);
+      // alert(newProduct.message);
 
       // 🌟 อัปเดตหน้าจอทันที
       // เอาของเดิมมากระจายออก (...prev) แล้วเอาของใหม่ไปต่อท้าย
-      setProducts((prev) => [...prev, newProduct]);
+      setProducts((prev) => [...prev, dataNew.newProduct]);
 
       // ล้างค่าในฟอร์มให้กลับมาว่างเปล่า เพื่อพร้อมกรอกชิ้นต่อไป
       setFormData({ name: "", price: "", quantity: 1 });
@@ -197,7 +204,7 @@ export default function App() {
               </button>
             </form>
 
-            <div >
+            <div>
               <table className="w-full max-w-2xl text-left border-collapse border border-gray-300">
                 {/* 1. ส่วนหัวตาราง (Header) */}
                 <thead>

@@ -4,6 +4,16 @@ import { products } from "./fakeDB/fakeDB.js";
 
 const app = express();
 
+// const corsOptions = {
+//   origin: [
+//     "http://localhost:5173",
+//     "http://localhost:5174",
+//     "http://localhost:5175",
+//   ], // frontend domain
+//   credentials: true, // ✅ allow cookies
+// };
+// app.use(cors(corsOptions));
+
 app.use(cors());
 app.use(express.json());
 
